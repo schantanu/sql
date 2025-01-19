@@ -1,0 +1,28 @@
+{
+    "markdown.styles": [
+        "assets/style.css"
+    ],
+    "[markdown]": {
+        "files.trimTrailingWhitespace": false
+    },
+    "markdown-pdf": {
+        "format": "Letter",
+        "displayHeaderFooter": true,
+        "headerTemplate": "<div></div>",
+        "footerTemplate": "<div style=\"font-family: 'PT Mono', monospace; font-size: 8px; margin: auto; margin-bottom:0.2mm; \"><span class='pageNumber'></span></div>",
+    },
+    "markdown.validate.enabled": true,
+    "markdown.updateLinksOnFileMove.enabled": "prompt",
+    "breadcrumbs.enabled": false,
+    "editor.minimap.enabled": false,
+    "editor.glyphMargin": false,
+    "editor.renderWhitespace": "none",
+    "editor.fontLigatures": true,
+    "explorer.decorations.badges": false,
+    "explorer.decorations.colors": false,
+    "files.autoSave": "afterDelay",
+    "git.enableSmartCommit": true,
+    "window.commandCenter": true,
+    "workbench.editor.untitled.hint": "hidden",
+    "workbench.startupEditor": "none",
+}
