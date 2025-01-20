@@ -223,7 +223,7 @@ FROM table t1
 INNER JOIN table t2
     ON t1.name = COALESCE(t2.firstname, t2.lastname);   -- COALESCE on JOIN condition
 
-SELECT INSERT('James B0ND',8,3,'ond');                  -- James Bond   - INSERT(string, position, length, new_string) 
+SELECT INSERT('James B0ND',8,3,'ond');                  -- James Bond   - INSERT(string, position, length, new_string)
 SELECT INSERT('Sch00l',4,2,'oo');                       -- School       - Inserts new string in existing string
 SELECT INSERT('Sch00l',4,1,'oo');                       -- Schoo0l      - Inserts and replaces the specified length
 
@@ -277,7 +277,7 @@ SELECT STRCMP('Hello','Hello');                         -- 0            - Return
 SELECT STRCMP('Hello','Hello1');                        -- -1           - Returns -1, if string1 < string2
 SELECT STRCMP('Hello1','Hello');                        -- 1            - Returns 1, if string1 > string2
 
-SELECT ELT(2,'Apple','Ball','Cat');                     -- Ball         - Similar to Python list, returns string as N position 
+SELECT ELT(2,'Apple','Ball','Cat');                     -- Ball         - Similar to Python list, returns string as N position
 SELECT FIELD('Ball','Apple','Ball','Cat');              -- 2            - Returns index of string in first argument
 SELECT FIND_IN_SET('b','a,b,c,d');                      -- 2            - Returns index of comma separated string
 
@@ -1222,4 +1222,109 @@ FROM dates;
 -- | date_match_pct1 | date_match_pct2 | date_match_pct3 |
 -- |-----------------|-----------------|-----------------|
 -- | 0.6667          | 0.6667          | 1.0000          |
+```
+<br>
+
+## SUBQUERY
+```sql
+--- A Subquery returns a variety of information
+    -- Scalar Values - 3.14159, -2, 0.001
+    -- List - WHERE id IN (12, 25, 36)
+    -- A Table
+-- Used for comparing groups to summarized values, reshaping data, combining data that cannot be joined
+
+-- Types of Subquery
+-- Subquery Types
+  -- In place of an Expression
+  -- With IN or NOT IN
+  -- In UPDATE, DELETE, or INSERT statement
+  -- With EXISTS or NOT EXISTS
+  -- With ANY or ALL
+  -- In the FROM clause (Derived Table)
+  -- Correlated Subquery
+
+DROP TABLE #products
+CREATE TABLE #products (product VARCHAR(10), cost INT)
+INSERT INTO #products VALUES ('ABC', 10), ('ABC', 20), ('ABC', 30),
+('XYZ', 15), ('XYZ', 25), ('XYZ', 35)
+SELECT * FROM #products;
+
+-- SUBQUERY in SELECT
+-- Subquery in SELECT requires a Scalar (Single) value to be returned
+-- as it needs to apply to all rows of the query
+SELECT *, (SELECT MAX(cost)
+            FROM #products) AS max_cost
+FROM #products;
+
+-- SUBQUERY in WHERE
+-- To find products that cost more than average cost
+SELECT product, cost, (SELECT AVG(cost) FROM #products) AS avg_cost
+FROM #products
+WHERE cost > (SELECT AVG(cost) FROM #products);
+
+-- If expecting multiple values use the IN operator in subquery
+-- Make sure to use DISTINCT to show only relevant products
+SELECT DISTINCT product
+FROM #products
+WHERE product IN (SELECT DISTINCT product
+                    FROM #products
+                    WHERE cost > 20);
+
+-- NESTED SUBQUERY
+SELECT DISTINCT product
+FROM #products
+WHERE product IN (SELECT product
+                    FROM #products
+                    GROUP BY product
+                    HAVING MAX(cost) > (SELECT AVG(cost)
+                                        FROM #products));
+```
+
+## DERIVED TABLE
+```sql
+-- Derived table is an expression that generats a table within the scope of a query FROM clause.
+-- SELECT ... FROM (subquery) [AS] tbl_name ...
+
+SELECT
+    AVG(t.max_cost * 1.0) as avg_max_cost
+FROM (SELECT product, MAX(cost) as max_cost
+      FROM #products
+      GROUP BY product) t
+```
+
+## CORRELATED SUBQUERY
+```sql
+-- For Correlated Subquery, there is no JOIN condition, but join is performed in the WHERE clause
+-- To find products that cost more than average cost of the same product
+
+SELECT product, cost, (SELECT AVG(cost)
+                        FROM #products b
+                        WHERE a.product = b.product) as prod_avg_cost
+FROM #products a
+WHERE cost > (SELECT AVG(cost)
+                FROM #products b
+                WHERE a.product = b.product)
+```
+
+## COMMON TABLE EXPRESSIONS (CTE)
+```sql
+-- Common Table Expressions is a temporary result set, that can be referenced within a SELECT, INSERT, UPDATE, or DELETE
+-- statement, that immediately follows the CTE. The CTE is stored in-memory and not on disk. CTE improves query performance
+-- and organization of complicated queries.
+
+-- Features
+-- More than one CTE can be defined in one WITH statement.
+-- Combine several CTEs with UNION or JOIN
+-- CTEs can be a substitute for a View
+-- CTEs can reference other CTEs
+-- Referencing itself (SELF JOIN) aka, Recursive CTEs
+
+WITH cte_name (Column1, Column2,...) AS (
+    CTE_query
+)
+
+-- If no column names are specified then column names from the sub query will be used
+WITH cte_name AS (
+    CTE_query
+)
 ```
